@@ -1,0 +1,6 @@
+{
+  "name": "Remix: Hakimi Herbals",
+  "description": "A client-side e-commerce store for herbal products featuring a fresh, clean design, cart management via Redux, WhatsApp order drafting, and Google Sheets integration.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

@@ -1,0 +1,28 @@
+
+import { CartItem, CustomerDetails } from '../types';
+import { OWNER_PHONE_NUMBER } from '../constants';
+
+export const generateWhatsAppLink = (customer: CustomerDetails, items: CartItem[], total: number): string => {
+  let message = `*New Order from Hakimi Herbals*\n\n`;
+  message += `*Customer Details:*\n`;
+  message += `Name: ${customer.name}\n`;
+  message += `Phone: ${customer.whatsapp}\n`;
+  
+  if (customer.email) {
+    message += `Email: ${customer.email}\n`;
+  }
+  
+  if (customer.address) {
+    message += `Address: ${customer.address}\n`;
+  }
+  
+  message += `\n*Order Summary:*\n`;
+  items.forEach(item => {
+    message += `- ${item.name} x ${item.quantity} : Rs. ${item.price * item.quantity}\n`;
+  });
+  
+  message += `\n*Total Amount: Rs. ${total}*`;
+  
+  const encodedMessage = encodeURIComponent(message);
+  return `https://wa.me/${OWNER_PHONE_NUMBER}?text=${encodedMessage}`;
+};

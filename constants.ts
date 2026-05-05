@@ -1,4 +1,4 @@
-export const GOOGLE_SHEET_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxd6NsprspYGZTmZG_ZUNtvH7WffeGWg0DxAzom4_6cTSWp70HdA84UVxxobdqz0d9W/exec";
+export const GOOGLE_SHEET_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbygPaNxUrqyptsHw8qjCMiJg9pvnP2zSQ1R1zMtCvUJaZKPh-5hrpoKtibpSm2I-WI/exec";
 export const OWNER_PHONE_NUMBER = "+923336645253";
 
 // Replace these with your actual Cloudinary credentials for the image uploader to work

@@ -13,7 +13,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { AppDispatch, RootState } from './store/store';
 import { fetchProducts } from './store/productsSlice';
 import { setHistoryOpen } from './store/historySlice';
-import { Loader2, Settings, MessageSquare, ArrowUp, Filter, Leaf, RotateCcw } from 'lucide-react';
+import { Settings, MessageSquare, ArrowUp, RotateCcw } from 'lucide-react';
 import { OWNER_PHONE_NUMBER } from './constants';
 import { Product } from './types';
 

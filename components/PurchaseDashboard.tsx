@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '../store/store';
 import { setHistoryOpen, clearHistory } from '../store/historySlice';
 import { addToCart } from '../store/cartSlice';
-import { X, Calendar, Package, Receipt, ArrowRight, Trash2, ShoppingBag } from 'lucide-react';
+import { X, Calendar, Package, Receipt, ArrowRight, Trash2 } from 'lucide-react';
 
 const PurchaseDashboard: React.FC = () => {
   const dispatch = useDispatch();

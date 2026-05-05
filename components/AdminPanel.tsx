@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { X, Upload, Copy, Check, ExternalLink, Image as ImageIcon, Trash2 } from 'lucide-react';
+import { X, Upload, Copy, Check, Image as ImageIcon, Trash2 } from 'lucide-react';
 import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET } from '../constants';
 
 interface AdminPanelProps {

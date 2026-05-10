@@ -75,7 +75,7 @@ const Hero: React.FC<HeroProps> = ({ onAddReview }) => {
                   onClick={onAddReview}
                   className="px-8 py-4 bg-hakimi-forest/40 backdrop-blur-md text-white border border-white/20 hover:bg-white hover:text-hakimi-forest font-bold rounded-2xl transition-all duration-300 shadow-xl flex items-center gap-3"
                 >
-                  Rate Website
+                  The Hakimi Experience
                 </button>
               </div>
             </div>

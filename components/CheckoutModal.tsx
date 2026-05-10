@@ -8,9 +8,9 @@ import { useDispatch } from 'react-redux';
 import { clearCart, setCartOpen } from '../store/cartSlice';
 import { addOrder } from '../store/historySlice';
 import { DELIVERY_AREAS } from '../constants';
-import ReviewForm from './ReviewForm';
-import { auth } from '../firebase';
-import { signInAnonymously } from 'firebase/auth';
+import { db, auth } from '../firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { Star } from 'lucide-react';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -28,6 +28,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, items, t
     email: '',
     area: DELIVERY_AREAS[0].name
   });
+  const [rating, setRating] = useState(5);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
@@ -39,13 +40,26 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, items, t
 
     try {
       // Background Tasks: Sign in anonymously for review submission
-      // We wrap this in a non-blocking try-catch
       try {
         if (!auth.currentUser) {
+          const { signInAnonymously } = await import('firebase/auth');
           await signInAnonymously(auth);
         }
       } catch (authErr) {
-        console.warn('Anonymous auth failed. This is expected if not enabled in Firebase Console.', authErr);
+        console.warn('Anonymous auth failed.', authErr);
+      }
+
+      // Save Review to Firestore
+      try {
+        await addDoc(collection(db, 'reviews'), {
+          userName: formData.name,
+          rating,
+          comment: 'Standard Rating',
+          status: 'approved', // Auto-approve since it's just stars now
+          createdAt: serverTimestamp(),
+        });
+      } catch (reviewErr) {
+        console.error('Failed to save review:', reviewErr);
       }
 
       const orderData: OrderData = {
@@ -116,37 +130,48 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, items, t
 
         <div className="p-8 bg-white max-h-[70vh] overflow-y-auto no-scrollbar">
           {isSuccess ? (
-            <div className="space-y-8">
-              <div className="bg-hakimi-cream/50 p-6 rounded-3xl border border-hakimi-sage/10 text-center space-y-4">
+            <div className="space-y-8 py-4">
+              <div className="bg-hakimi-cream/50 p-8 rounded-3xl border border-hakimi-sage/10 text-center space-y-6 animate-fade-in">
                 <div className="w-16 h-16 bg-hakimi-sage/10 rounded-full flex items-center justify-center mx-auto text-hakimi-sage">
                   <Send className="w-8 h-8" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-serif font-black text-hakimi-forest">WhatsApp Redirection</h3>
-                  <p className="text-sm text-gray-500 font-medium">Your order has been captured. If WhatsApp didn't open automatically, please tap the button below.</p>
+                  <h3 className="text-2xl font-serif font-black text-hakimi-forest">Success!</h3>
+                  <p className="text-gray-500 font-medium">Your harvest is ready. If WhatsApp didn't open automatically, please tap below.</p>
                 </div>
                 <button
                   onClick={() => window.location.href = generateWhatsAppLink(formData, items, total)}
-                  className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white py-4 rounded-2xl font-black shadow-lg shadow-[#25D366]/20 flex items-center justify-center gap-3 transition-all uppercase tracking-widest text-xs"
+                  className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white py-5 rounded-2xl font-black shadow-lg shadow-[#25D366]/20 flex items-center justify-center gap-3 transition-all uppercase tracking-widest"
                 >
                   Open WhatsApp <Send className="w-4 h-4" />
                 </button>
+                <button 
+                  onClick={handleClose}
+                  className="text-xs font-black uppercase tracking-widest text-hakimi-sage hover:text-hakimi-forest transition-colors"
+                >
+                  Return to Shop
+                </button>
               </div>
-              
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                  <div className="w-full border-t border-gray-200"></div>
-                </div>
-                <div className="relative flex justify-center text-xs uppercase font-black tracking-widest">
-                  <span className="bg-white px-4 text-hakimi-sage">Then Leave a Review</span>
-                </div>
-              </div>
-
-              <ReviewForm onSuccess={handleClose} initialName={formData.name} />
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-4">
+                <div className="bg-hakimi-cream/30 p-4 rounded-2xl border border-hakimi-sage/10">
+                  <label className="block text-[10px] font-black text-hakimi-forest uppercase tracking-widest mb-3 text-center">The Hakimi Experience</label>
+                  <div className="flex justify-center gap-2">
+                    {[1, 2, 3, 4, 5].map((num) => (
+                      <button
+                        key={num}
+                        type="button"
+                        onClick={() => setRating(num)}
+                        className={`p-1 transition-all ${rating >= num ? 'text-hakimi-terracotta scale-110' : 'text-gray-200'}`}
+                      >
+                        <i className={`lucide-star w-8 h-8 ${rating >= num ? 'fill-current' : ''}`}><Star className="w-8 h-8" /></i>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 <div>
                   <label className="block text-[10px] font-black text-hakimi-forest uppercase tracking-widest mb-1.5 ml-1">Full Name</label>
                   <input

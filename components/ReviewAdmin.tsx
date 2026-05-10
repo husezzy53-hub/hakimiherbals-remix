@@ -3,12 +3,11 @@ import React, { useEffect, useState } from 'react';
 import { db } from '../firebase';
 import { collection, query, orderBy, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { Review } from '../types';
-import { Check, X, ShieldAlert, Star, Mic, Play, Pause, Trash2, Calendar } from 'lucide-react';
+import { Check, X, ShieldAlert, Star, Trash2, Calendar } from 'lucide-react';
 
 const ReviewAdmin: React.FC = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
-  const [playingIdx, setPlayingIdx] = useState<string | null>(null);
 
   useEffect(() => {
     const q = query(collection(db, 'reviews'), orderBy('createdAt', 'desc'));
@@ -35,21 +34,6 @@ const ReviewAdmin: React.FC = () => {
       await deleteDoc(doc(db, 'reviews', id));
     } catch (err) {
       console.error('Failed to delete review', err);
-    }
-  };
-
-  const toggleAudio = (id: string) => {
-    const audio = document.getElementById(`admin-audio-${id}`) as HTMLAudioElement;
-    if (playingIdx === id) {
-      audio.pause();
-      setPlayingIdx(null);
-    } else {
-      if (playingIdx !== null) {
-        const prev = document.getElementById(`admin-audio-${playingIdx}`) as HTMLAudioElement;
-        prev.pause();
-      }
-      audio.play();
-      setPlayingIdx(id);
     }
   };
 
@@ -88,25 +72,9 @@ const ReviewAdmin: React.FC = () => {
                       </span>
                     </div>
                     
-                    <p className="text-gray-700 italic text-sm">"{review.comment}"</p>
+                    {review.comment && <p className="text-gray-700 italic text-sm">"{review.comment}"</p>}
                     
-                    <div className="flex flex-wrap gap-4 items-center">
-                      {review.audioUrl && (
-                        <div className="flex items-center gap-2 bg-hakimi-cream px-3 py-2 rounded-xl border border-hakimi-sage/10">
-                          <button onClick={() => toggleAudio(review.id!)} className="text-hakimi-forest">
-                            {playingIdx === review.id ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                          </button>
-                          <audio id={`admin-audio-${review.id!}`} src={review.audioUrl} onEnded={() => setPlayingIdx(null)} hidden />
-                          <span className="text-[10px] font-black tracking-widest uppercase text-hakimi-sage flex items-center gap-1">Audio <Mic className="w-3 h-3" /></span>
-                        </div>
-                      )}
-                      
-                      {review.imageUrls.map((url, i) => (
-                        <a key={i} href={url} target="_blank" rel="noreferrer" className="w-12 h-12 rounded-lg overflow-hidden border border-hakimi-sage/20 hover:scale-110 transition-transform">
-                          <img src={url} className="w-full h-full object-cover" />
-                        </a>
-                      ))}
-                    </div>
+                    {/* Simplified View: No Audio or Photos */}
                   </div>
 
                   <div className="flex md:flex-col gap-2 shrink-0">
@@ -156,7 +124,7 @@ const ReviewAdmin: React.FC = () => {
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>
-              <p className="text-gray-600 text-[11px] font-medium italic line-clamp-3">"{review.comment}"</p>
+              {review.comment && <p className="text-gray-600 text-[11px] font-medium italic line-clamp-3">"{review.comment}"</p>}
               <div className="mt-4 flex justify-between items-center">
                 <button 
                   onClick={() => updateStatus(review.id!, 'pending')}

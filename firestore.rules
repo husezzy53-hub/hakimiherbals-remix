@@ -27,19 +27,16 @@ service cloud.firestore {
 
     match /reviews/{reviewId} {
       function isValidReview(data) {
-        return data.userName is string && data.userName.size() > 0 && data.userName.size() < 100
+        return data.userName is string && data.userName.size() < 100
             && data.rating is number && data.rating >= 1 && data.rating <= 5
             && data.comment is string && data.comment.size() <= 5000
-            && (!('audioUrl' in data) || data.audioUrl == null || (data.audioUrl is string && data.audioUrl.size() < 1000))
-            && data.imageUrls is list && data.imageUrls.size() <= 10
             && data.status in ['pending', 'approved', 'rejected']
             && data.createdAt is timestamp;
       }
 
       allow create: if isSignedIn() 
                     && isValidId(reviewId) 
-                    && isValidReview(incoming())
-                    && incoming().status == 'pending';
+                    && isValidReview(incoming());
 
       allow update: if isAdmin() 
                     && isValidReview(incoming());

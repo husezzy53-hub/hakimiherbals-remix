@@ -2,17 +2,12 @@
   "entities": {
     "Review": {
       "title": "Review",
-      "description": "User reviews for products or the shop.",
+      "description": "User ratings and reviews.",
       "type": "object",
       "properties": {
         "userName": { "type": "string" },
         "rating": { "type": "number" },
         "comment": { "type": "string" },
-        "audioUrl": { "type": "string" },
-        "imageUrls": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
         "status": {
           "type": "string",
           "enum": ["pending", "approved", "rejected"]

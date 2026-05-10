@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
-import { Star, Mic, Play, Pause, User } from 'lucide-react';
+import { Star, User } from 'lucide-react';
 import { db } from '../firebase';
 import { collection, query, where, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import { Review } from '../types';
@@ -12,7 +12,6 @@ interface ReviewListProps {
 const ReviewList: React.FC<ReviewListProps> = ({ onAddReview }) => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
-  const [playingIdx, setPlayingIdx] = useState<number | null>(null);
 
   useEffect(() => {
     const q = query(
@@ -30,21 +29,6 @@ const ReviewList: React.FC<ReviewListProps> = ({ onAddReview }) => {
 
     return () => unsubscribe();
   }, []);
-
-  const toggleAudio = (idx: number) => {
-    const audio = document.getElementById(`audio-${idx}`) as HTMLAudioElement;
-    if (playingIdx === idx) {
-      audio.pause();
-      setPlayingIdx(null);
-    } else {
-      if (playingIdx !== null) {
-        const prev = document.getElementById(`audio-${playingIdx}`) as HTMLAudioElement;
-        prev.pause();
-      }
-      audio.play();
-      setPlayingIdx(idx);
-    }
-  };
 
   if (loading) {
     return (
@@ -69,7 +53,7 @@ const ReviewList: React.FC<ReviewListProps> = ({ onAddReview }) => {
               onClick={onAddReview}
               className="px-6 py-3 bg-hakimi-forest text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-hakimi-forest/20 hover:bg-hakimi-sage transition-all active:scale-95"
             >
-              Share Your Review
+              The Hakimi Experience
             </button>
             <div className="flex font-black text-[10px] uppercase tracking-widest text-hakimi-sage items-center gap-2 opacity-60">
               <Star className="w-4 h-4 fill-current text-hakimi-terracotta" /> 
@@ -79,12 +63,12 @@ const ReviewList: React.FC<ReviewListProps> = ({ onAddReview }) => {
         </div>
 
         <div className="flex overflow-x-auto no-scrollbar gap-8 pb-12 -mx-4 px-4 snap-x">
-          {reviews.map((review, idx) => (
+          {reviews.map((review) => (
             <div 
               key={review.id} 
               className="flex-shrink-0 w-80 md:w-96 bg-white rounded-5xl p-8 border border-hakimi-sage/10 shadow-sm snap-start flex flex-col hover:shadow-xl hover:scale-[1.02] transition-all"
             >
-              <div className="flex items-center gap-4 mb-6">
+              <div className="flex items-center gap-4 mb-2">
                 <div className="w-12 h-12 bg-hakimi-cream rounded-2xl flex items-center justify-center text-hakimi-sage">
                   <User className="w-6 h-6" />
                 </div>
@@ -101,48 +85,11 @@ const ReviewList: React.FC<ReviewListProps> = ({ onAddReview }) => {
                 </div>
               </div>
 
-              <div className="relative mb-6">
-                <p className="text-hakimi-forest/80 font-medium italic leading-relaxed text-balance">
-                  "{review.comment}"
-                </p>
-              </div>
-
-              {review.audioUrl && (
-                <div className="mb-6 p-4 bg-hakimi-cream rounded-3xl flex items-center gap-4 border border-hakimi-sage/5">
-                  <button 
-                    onClick={() => toggleAudio(idx)}
-                    className="w-10 h-10 bg-hakimi-forest text-white rounded-full flex items-center justify-center hover:bg-hakimi-terracotta transition-colors shadow-lg"
-                  >
-                    {playingIdx === idx ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-                  </button>
-                  <div className="flex-grow">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-hakimi-forest opacity-40 block mb-1">Voice Review</span>
-                    <audio 
-                      id={`audio-${idx}`} 
-                      src={review.audioUrl} 
-                      onEnded={() => setPlayingIdx(null)}
-                      hidden
-                    />
-                    <div className="flex gap-1 h-1 items-center">
-                      {[...Array(12)].map((_, i) => (
-                        <div key={i} className={`flex-grow bg-hakimi-sage/20 rounded-full h-full ${playingIdx === idx ? 'animate-pulse' : ''}`} style={{height: `${Math.random() * 100}%`}}></div>
-                      ))}
-                    </div>
-                  </div>
-                  <Mic className="w-4 h-4 text-hakimi-sage opacity-20" />
-                </div>
-              )}
-
-              {review.imageUrls && review.imageUrls.length > 0 && (
-                <div className="grid grid-cols-3 gap-2 mt-auto">
-                  {review.imageUrls.slice(0, 3).map((url, i) => (
-                    <img 
-                      key={i} 
-                      src={url} 
-                      alt="Review product" 
-                      className="w-full h-20 object-cover rounded-2xl border border-hakimi-cream shadow-sm"
-                    />
-                  ))}
+              {review.comment && (
+                <div className="relative mb-6">
+                  <p className="text-hakimi-forest/80 font-medium italic leading-relaxed text-balance">
+                    "{review.comment}"
+                  </p>
                 </div>
               )}
             </div>

@@ -21,7 +21,7 @@ const ReviewModal: React.FC<ReviewModalProps> = ({ isOpen, onClose }) => {
           <div className="absolute top-0 right-0 w-32 h-32 bg-hakimi-terracotta/20 blur-3xl rounded-full -mr-16 -mt-16"></div>
           
           <div className="relative z-10">
-            <h2 className="text-3xl font-serif font-black tracking-tight">Share Your Journey</h2>
+            <h2 className="text-3xl font-serif font-black tracking-tight">The Hakimi Experience</h2>
             <p className="text-hakimi-sage font-medium text-sm">Help others discover the power of nature</p>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors relative z-10">

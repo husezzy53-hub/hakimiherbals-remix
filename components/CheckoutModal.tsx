@@ -60,7 +60,10 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, items, t
       const link = generateWhatsAppLink(formData, items, total);
 
       // 4. Open WhatsApp
-      window.open(link, '_blank');
+      // Use a brief delay and try to open directly
+      setTimeout(() => {
+        window.location.href = link;
+      }, 100);
 
       // 5. Cleanup & Show Review Form
       dispatch(clearCart());
@@ -102,7 +105,34 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, items, t
 
         <div className="p-8 bg-white max-h-[70vh] overflow-y-auto no-scrollbar">
           {isSuccess ? (
-            <ReviewForm onSuccess={handleClose} initialName={formData.name} />
+            <div className="space-y-8">
+              <div className="bg-hakimi-cream/50 p-6 rounded-3xl border border-hakimi-sage/10 text-center space-y-4">
+                <div className="w-16 h-16 bg-hakimi-sage/10 rounded-full flex items-center justify-center mx-auto text-hakimi-sage">
+                  <Send className="w-8 h-8" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-serif font-black text-hakimi-forest">WhatsApp Redirection</h3>
+                  <p className="text-sm text-gray-500 font-medium">Your order has been captured. If WhatsApp didn't open automatically, please tap the button below.</p>
+                </div>
+                <button
+                  onClick={() => window.location.href = generateWhatsAppLink(formData, items, total)}
+                  className="w-full bg-[#25D366] hover:bg-[#128C7E] text-white py-4 rounded-2xl font-black shadow-lg shadow-[#25D366]/20 flex items-center justify-center gap-3 transition-all uppercase tracking-widest text-xs"
+                >
+                  Open WhatsApp <Send className="w-4 h-4" />
+                </button>
+              </div>
+              
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                  <div className="w-full border-t border-gray-200"></div>
+                </div>
+                <div className="relative flex justify-center text-xs uppercase font-black tracking-widest">
+                  <span className="bg-white px-4 text-hakimi-sage">Then Leave a Review</span>
+                </div>
+              </div>
+
+              <ReviewForm onSuccess={handleClose} initialName={formData.name} />
+            </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-4">

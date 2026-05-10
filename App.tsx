@@ -7,7 +7,6 @@ import CartSidebar from './components/CartSidebar';
 import FeaturedCarousel from './components/FeaturedCarousel';
 import AdminPanel from './components/AdminPanel';
 import PurchaseDashboard from './components/PurchaseDashboard';
-import ProductLaunchPopup from './components/ProductLaunchPopup';
 import ProductModal from './components/ProductModal';
 import { useSelector, useDispatch } from 'react-redux';
 import { AppDispatch, RootState } from './store/store';
@@ -82,24 +81,6 @@ const App: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleLaunchShopNow = () => {
-    const sprayProduct = products.find(p => p.name.toLowerCase().includes('body spray'));
-    
-    // Clear filters immediately
-    setSearchQuery('');
-    setSelectedCategory('All');
-    
-    if (sprayProduct) {
-      setHighlightedProduct(sprayProduct);
-    }
-
-    const element = document.getElementById('collection');
-    if (element) {
-      // Use instant behavior for "Direct" feel
-      element.scrollIntoView({ behavior: 'auto' });
-    }
-  };
-
   if (showSplash) {
     return (
       <div className={`fixed inset-0 z-[200] flex flex-col items-center justify-center bg-hakimi-cream ${splashExiting ? 'animate-splash-exit' : ''}`}>
@@ -151,7 +132,6 @@ const App: React.FC = () => {
       />
       <CartSidebar />
       <PurchaseDashboard />
-      <ProductLaunchPopup onShopNow={handleLaunchShopNow} />
       <AdminPanel isOpen={isAdminOpen} onClose={() => setIsAdminOpen(false)} />
       
       {highlightedProduct && (

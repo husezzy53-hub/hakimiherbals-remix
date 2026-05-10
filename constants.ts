@@ -2,8 +2,8 @@ export const GOOGLE_SHEET_SCRIPT_URL = "https://script.google.com/macros/s/AKfyc
 export const OWNER_PHONE_NUMBER = "+923336645253";
 
 export const CONTACT_NUMBERS = [
-  { name: "General Info", number: "03336645253" },
-  { name: "General Info", number: "03003614552" }
+  { name: "General Info", number: "+923336645253" },
+  { name: "General Info", number: "+923003614552" }
 ];
 
 export const BUSINESS_OWNERS = [

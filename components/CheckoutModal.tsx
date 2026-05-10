@@ -183,6 +183,17 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, items, t
                 </div>
 
                 <div>
+                  <label className="block text-[10px] font-black text-hakimi-forest uppercase tracking-widest mb-1.5 ml-1">Email <span className="text-hakimi-sage/60 font-medium normal-case">(Optional for notifications)</span></label>
+                  <input
+                    type="email"
+                    className="w-full px-5 py-3.5 rounded-2xl bg-hakimi-cream/50 border border-transparent focus:bg-white focus:border-hakimi-sage focus:ring-4 focus:ring-hakimi-sage/10 outline-none transition-all font-medium text-hakimi-forest"
+                    placeholder="Where should we send confirmation?"
+                    value={formData.email}
+                    onChange={e => setFormData({...formData, email: e.target.value})}
+                  />
+                </div>
+
+                <div>
                   <label className="block text-[10px] font-black text-hakimi-forest uppercase tracking-widest mb-1.5 ml-1">Delivery Area</label>
                   <div className="relative">
                     <select

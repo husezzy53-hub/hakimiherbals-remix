@@ -1,0 +1,57 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    match /reviews/{reviewId} {
+      function isValidReview(data) {
+        return data.userName is string && data.userName.size() > 0 && data.userName.size() < 100
+            && data.rating is number && data.rating >= 1 && data.rating <= 5
+            && data.comment is string && data.comment.size() <= 5000
+            && (!('audioUrl' in data) || data.audioUrl == null || (data.audioUrl is string && data.audioUrl.size() < 1000))
+            && data.imageUrls is list && data.imageUrls.size() <= 10
+            && data.status in ['pending', 'approved', 'rejected']
+            && data.createdAt is timestamp;
+      }
+
+      allow create: if isSignedIn() 
+                    && isValidId(reviewId) 
+                    && isValidReview(incoming())
+                    && incoming().status == 'pending';
+
+      allow update: if isAdmin() 
+                    && isValidReview(incoming());
+
+      allow delete: if isAdmin();
+      
+      allow read: if resource.data.status == 'approved' || isAdmin();
+      allow list: if (resource.data.status == 'approved') || isAdmin();
+    }
+    
+    match /admins/{adminId} {
+      allow read: if isSignedIn() && request.auth.uid == adminId;
+    }
+  }
+}

@@ -8,6 +8,8 @@ import FeaturedCarousel from './components/FeaturedCarousel';
 import AdminPanel from './components/AdminPanel';
 import PurchaseDashboard from './components/PurchaseDashboard';
 import ProductModal from './components/ProductModal';
+import Contact from './components/Contact';
+import ReviewList from './components/ReviewList';
 import { useSelector, useDispatch } from 'react-redux';
 import { AppDispatch, RootState } from './store/store';
 import { fetchProducts } from './store/productsSlice';
@@ -212,6 +214,9 @@ const App: React.FC = () => {
           </div>
         </section>
       </main>
+
+      <ReviewList />
+      <Contact />
 
       <div className="fixed bottom-8 right-8 z-[100] flex flex-col gap-4">
         {showBackToTop && (

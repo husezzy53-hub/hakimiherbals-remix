@@ -1,0 +1,31 @@
+{
+  "entities": {
+    "Review": {
+      "title": "Review",
+      "description": "User reviews for products or the shop.",
+      "type": "object",
+      "properties": {
+        "userName": { "type": "string" },
+        "rating": { "type": "number" },
+        "comment": { "type": "string" },
+        "audioUrl": { "type": "string" },
+        "imageUrls": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "approved", "rejected"]
+        },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userName", "rating", "status", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/reviews/{reviewId}": {
+      "schema": "Review",
+      "description": "Collection of moderation-controlled reviews."
+    }
+  }
+}

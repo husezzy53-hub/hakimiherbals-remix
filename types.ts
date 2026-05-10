@@ -17,6 +17,7 @@ export interface CustomerDetails {
   whatsapp: string;
   address: string;
   email: string;
+  area: string;
 }
 
 export interface OrderData {
@@ -24,4 +25,15 @@ export interface OrderData {
   items: CartItem[];
   total: number;
   date: string;
+}
+
+export interface Review {
+  id?: string;
+  userName: string;
+  rating: number;
+  comment: string;
+  audioUrl?: string;
+  imageUrls: string[];
+  status: 'pending' | 'approved' | 'rejected';
+  createdAt: any; // Firestore Timestamp
 }

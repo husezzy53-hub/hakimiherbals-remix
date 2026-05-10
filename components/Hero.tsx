@@ -4,7 +4,11 @@ import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store/store';
 
-const Hero: React.FC = () => {
+interface HeroProps {
+  onAddReview: () => void;
+}
+
+const Hero: React.FC<HeroProps> = ({ onAddReview }) => {
   const products = useSelector((state: RootState) => state.products.items);
   const [current, setCurrent] = useState(0);
 
@@ -60,12 +64,18 @@ const Hero: React.FC = () => {
               <p className="text-lg md:text-xl font-medium text-hakimi-cream/80 max-w-lg leading-relaxed line-clamp-2 animate-fade-in-up [animation-delay:400ms]">
                 {slide.subtitle}
               </p>
-              <div className="pt-4 animate-fade-in-up [animation-delay:600ms]">
+              <div className="pt-4 flex flex-wrap gap-4 animate-fade-in-up [animation-delay:600ms]">
                 <button 
                   onClick={() => handleCtaClick(slide.targetId)}
                   className="px-8 py-4 bg-white text-hakimi-forest hover:bg-hakimi-terracotta hover:text-white font-bold rounded-2xl transition-all duration-300 shadow-2xl flex items-center gap-3"
                 >
                   {slide.cta} <ChevronRight className="w-4 h-4" />
+                </button>
+                <button 
+                  onClick={onAddReview}
+                  className="px-8 py-4 bg-hakimi-forest/40 backdrop-blur-md text-white border border-white/20 hover:bg-white hover:text-hakimi-forest font-bold rounded-2xl transition-all duration-300 shadow-xl flex items-center gap-3"
+                >
+                  Rate Website
                 </button>
               </div>
             </div>

@@ -10,11 +10,12 @@ import PurchaseDashboard from './components/PurchaseDashboard';
 import ProductModal from './components/ProductModal';
 import Contact from './components/Contact';
 import ReviewList from './components/ReviewList';
+import ReviewModal from './components/ReviewModal';
 import { useSelector, useDispatch } from 'react-redux';
 import { AppDispatch, RootState } from './store/store';
 import { fetchProducts } from './store/productsSlice';
 import { setHistoryOpen } from './store/historySlice';
-import { Settings, MessageSquare, ArrowUp, RotateCcw } from 'lucide-react';
+import { Settings, MessageSquare, ArrowUp, RotateCcw, Star } from 'lucide-react';
 import { OWNER_PHONE_NUMBER } from './constants';
 import { Product } from './types';
 
@@ -22,6 +23,7 @@ const App: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { items: products, loading, error } = useSelector((state: RootState) => state.products);
   const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const [isReviewOpen, setIsReviewOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -135,6 +137,7 @@ const App: React.FC = () => {
       <CartSidebar />
       <PurchaseDashboard />
       <AdminPanel isOpen={isAdminOpen} onClose={() => setIsAdminOpen(false)} />
+      <ReviewModal isOpen={isReviewOpen} onClose={() => setIsReviewOpen(false)} />
       
       {highlightedProduct && (
         <ProductModal 
@@ -145,7 +148,7 @@ const App: React.FC = () => {
       )}
       
       <main className="flex-grow">
-        <Hero />
+        <Hero onAddReview={() => setIsReviewOpen(true)} />
         
         {featuredProducts.length > 0 && searchQuery === '' && (
           <section id="featured" className="py-20 bg-white relative overflow-hidden">
@@ -215,8 +218,18 @@ const App: React.FC = () => {
         </section>
       </main>
 
-      <ReviewList />
+      <ReviewList onAddReview={() => setIsReviewOpen(true)} />
       <Contact />
+
+      <div className="fixed top-1/2 left-0 -translate-y-1/2 z-[100] hidden md:block">
+        <button 
+          onClick={() => setIsReviewOpen(true)}
+          className="bg-hakimi-forest text-white py-4 px-2 rounded-r-2xl shadow-2xl flex flex-col items-center gap-3 hover:bg-hakimi-terracotta transition-all group scale-90 hover:scale-100 origin-left"
+        >
+          <Star className="w-5 h-5 fill-current text-hakimi-terracotta group-hover:text-white" />
+          <span className="text-[10px] font-black uppercase tracking-widest [writing-mode:vertical-lr] rotate-180">Rate Apothecary</span>
+        </button>
+      </div>
 
       <div className="fixed bottom-8 right-8 z-[100] flex flex-col gap-4">
         {showBackToTop && (

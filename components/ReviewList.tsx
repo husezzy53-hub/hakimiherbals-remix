@@ -5,7 +5,11 @@ import { db } from '../firebase';
 import { collection, query, where, orderBy, limit, onSnapshot } from 'firebase/firestore';
 import { Review } from '../types';
 
-const ReviewList: React.FC = () => {
+interface ReviewListProps {
+  onAddReview: () => void;
+}
+
+const ReviewList: React.FC<ReviewListProps> = ({ onAddReview }) => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [playingIdx, setPlayingIdx] = useState<number | null>(null);
@@ -60,8 +64,14 @@ const ReviewList: React.FC = () => {
             <span className="text-hakimi-terracotta font-black tracking-[0.3em] uppercase text-xs">Testimonials</span>
             <h2 className="text-4xl md:text-5xl font-serif font-black text-hakimi-forest mt-3 leading-tight">Wisdom from the Collective</h2>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="flex font-black text-xs uppercase tracking-widest text-hakimi-sage items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            <button 
+              onClick={onAddReview}
+              className="px-6 py-3 bg-hakimi-forest text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-hakimi-forest/20 hover:bg-hakimi-sage transition-all active:scale-95"
+            >
+              Share Your Review
+            </button>
+            <div className="flex font-black text-[10px] uppercase tracking-widest text-hakimi-sage items-center gap-2 opacity-60">
               <Star className="w-4 h-4 fill-current text-hakimi-terracotta" /> 
               Truly Natural Experiences
             </div>

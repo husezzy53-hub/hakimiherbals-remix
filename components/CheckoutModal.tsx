@@ -38,9 +38,14 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, items, t
     setIsSubmitting(true);
 
     try {
-      // Sign in anonymously for review submission permissions
-      if (!auth.currentUser) {
-        await signInAnonymously(auth);
+      // Background Tasks: Sign in anonymously for review submission
+      // We wrap this in a non-blocking try-catch
+      try {
+        if (!auth.currentUser) {
+          await signInAnonymously(auth);
+        }
+      } catch (authErr) {
+        console.warn('Anonymous auth failed. This is expected if not enabled in Firebase Console.', authErr);
       }
 
       const orderData: OrderData = {
@@ -50,27 +55,33 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, items, t
         date: new Date().toISOString()
       };
 
-      // 1. Submit to Google Sheets (External)
-      await submitOrderToSheet(orderData);
+      // Background Task: Submit to Google Sheets
+      // We wrap this in a non-blocking try-catch
+      try {
+        await submitOrderToSheet(orderData).catch(err => console.error('Sheet submission failed:', err));
+      } catch (sheetErr) {
+        console.error('Sheet submission task encountered an error:', sheetErr);
+      }
 
-      // 2. Save to local history (Internal)
+      // Save to local history (Internal)
       dispatch(addOrder(orderData));
 
-      // 3. Generate WhatsApp Link
+      // Generate WhatsApp Link
       const link = generateWhatsAppLink(formData, items, total);
 
-      // 4. Open WhatsApp
-      // Use a brief delay and try to open directly
-      setTimeout(() => {
-        window.location.href = link;
-      }, 100);
+      // Open WhatsApp
+      // Primary method: location.href is more reliable for mobile redirects
+      window.location.href = link;
 
-      // 5. Cleanup & Show Review Form
+      // Cleanup & Show Review Form
       dispatch(clearCart());
       setIsSuccess(true);
     } catch (err) {
-      console.error('Checkout failed', err);
-      alert('Nature encountered a pebble. Please try again.');
+      console.error('Critical Checkout Error:', err);
+      // Even if everything fails, try to get the user to WhatsApp
+      const fallbackLink = generateWhatsAppLink(formData, items, total);
+      window.location.href = fallbackLink;
+      setIsSuccess(true);
     } finally {
       setIsSubmitting(false);
     }

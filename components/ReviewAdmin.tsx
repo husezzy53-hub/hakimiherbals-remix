@@ -63,7 +63,7 @@ const ReviewAdmin: React.FC = () => {
                     <div className="flex items-center gap-3">
                       <div className="flex">
                         {[...Array(5)].map((_, i) => (
-                          <Star key={i} className={`w-4 h-4 ${i < review.rating ? 'text-hakimi-terracotta fill-current' : 'text-gray-200'}`} />
+                          <Star key={i} className={`w-4 h-4 ${i < review.rating ? 'text-amber-400 fill-current' : 'text-gray-200'}`} />
                         ))}
                       </div>
                       <span className="text-sm font-bold text-hakimi-forest">{review.userName}</span>
@@ -112,7 +112,7 @@ const ReviewAdmin: React.FC = () => {
                 <div className="flex items-center gap-2">
                    <div className="flex">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} className={`w-3 h-3 ${i < review.rating ? 'text-hakimi-terracotta fill-current' : 'text-gray-200'}`} />
+                      <Star key={i} className={`w-3 h-3 ${i < review.rating ? 'text-amber-400 fill-current' : 'text-gray-200'}`} />
                     ))}
                   </div>
                   <span className="text-xs font-bold text-hakimi-forest">{review.userName}</span>

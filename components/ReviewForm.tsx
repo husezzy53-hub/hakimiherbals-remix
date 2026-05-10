@@ -33,7 +33,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ onSuccess, initialName = '' }) 
       setSubmitted(true);
       setTimeout(() => {
         onSuccess();
-      }, 2000);
+      }, 800);
     } catch (err) {
       console.error('Failed to submit review', err);
       alert('Failed to submit rating. Please try again.');
@@ -44,12 +44,12 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ onSuccess, initialName = '' }) 
 
   if (submitted) {
     return (
-      <div className="text-center py-8 animate-fade-in">
-        <div className="w-16 h-16 bg-hakimi-sage/10 rounded-full flex items-center justify-center mx-auto mb-4">
+      <div className="text-center py-6 animate-pulse">
+        <div className="w-16 h-16 bg-hakimi-sage/10 rounded-full flex items-center justify-center mx-auto mb-3">
           <CheckCircle2 className="w-8 h-8 text-hakimi-sage" />
         </div>
-        <h3 className="text-xl font-serif font-black text-hakimi-forest mb-1">Rating Shared</h3>
-        <p className="text-sm text-gray-500 font-medium">Thank you for your feedback.</p>
+        <h3 className="text-xl font-serif font-black text-hakimi-forest mb-1">Success!</h3>
+        <p className="text-sm text-gray-500 font-medium">Thank you for your rating.</p>
       </div>
     );
   }
@@ -64,7 +64,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ onSuccess, initialName = '' }) 
               key={num}
               type="button"
               onClick={() => setRating(num)}
-              className={`p-2 transition-all duration-300 ${rating >= num ? 'text-hakimi-terracotta scale-125' : 'text-gray-200 hover:text-hakimi-sage/40'}`}
+              className={`p-2 transition-all duration-300 ${rating >= num ? 'text-amber-400 scale-125' : 'text-gray-200 hover:text-hakimi-sage/40'}`}
             >
               <Star className={`w-12 h-12 ${rating >= num ? 'fill-current' : ''}`} />
             </button>

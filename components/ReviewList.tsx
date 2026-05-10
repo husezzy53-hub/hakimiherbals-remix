@@ -56,7 +56,7 @@ const ReviewList: React.FC<ReviewListProps> = ({ onAddReview }) => {
               The Hakimi Experience
             </button>
             <div className="flex font-black text-[10px] uppercase tracking-widest text-hakimi-sage items-center gap-2 opacity-60">
-              <Star className="w-4 h-4 fill-current text-hakimi-terracotta" /> 
+              <Star className="w-4 h-4 fill-current text-amber-400" /> 
               Truly Natural Experiences
             </div>
           </div>
@@ -78,7 +78,7 @@ const ReviewList: React.FC<ReviewListProps> = ({ onAddReview }) => {
                     {[...Array(5)].map((_, i) => (
                       <Star 
                         key={i} 
-                        className={`w-3 h-3 ${i < review.rating ? 'text-hakimi-terracotta fill-current' : 'text-gray-200'}`} 
+                        className={`w-3 h-3 ${i < review.rating ? 'text-amber-400 fill-current' : 'text-gray-200'}`} 
                       />
                     ))}
                   </div>

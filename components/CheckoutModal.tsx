@@ -39,29 +39,6 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, items, t
     setIsSubmitting(true);
 
     try {
-      // Background Tasks: Sign in anonymously for review submission
-      try {
-        if (!auth.currentUser) {
-          const { signInAnonymously } = await import('firebase/auth');
-          await signInAnonymously(auth);
-        }
-      } catch (authErr) {
-        console.warn('Anonymous auth failed.', authErr);
-      }
-
-      // Save Review to Firestore
-      try {
-        await addDoc(collection(db, 'reviews'), {
-          userName: formData.name,
-          rating,
-          comment: 'Standard Rating',
-          status: 'approved', // Auto-approve since it's just stars now
-          createdAt: serverTimestamp(),
-        });
-      } catch (reviewErr) {
-        console.error('Failed to save review:', reviewErr);
-      }
-
       const orderData: OrderData = {
         customer: formData,
         items,
@@ -69,25 +46,34 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, items, t
         date: new Date().toISOString()
       };
 
-      // Background Task: Submit to Google Sheets
-      // We wrap this in a non-blocking try-catch
-      try {
-        await submitOrderToSheet(orderData).catch(err => console.error('Sheet submission failed:', err));
-      } catch (sheetErr) {
-        console.error('Sheet submission task encountered an error:', sheetErr);
-      }
+      // Background tasks (Fire-and-forget for speed)
+      (async () => {
+        try {
+          if (!auth.currentUser) {
+            const { signInAnonymously } = await import('firebase/auth');
+            await signInAnonymously(auth);
+          }
+          await addDoc(collection(db, 'reviews'), {
+            userName: formData.name,
+            rating,
+            comment: 'Standard Rating',
+            status: 'approved',
+            createdAt: serverTimestamp(),
+          });
+        } catch (err) {
+          console.warn('Post-checkout review save failed:', err);
+        }
+      })();
 
-      // Save to local history (Internal)
-      dispatch(addOrder(orderData));
+      // Start Sheet Submission in background
+      submitOrderToSheet(orderData).catch(err => console.error('Sheet submission failed:', err));
 
-      // Generate WhatsApp Link
       const link = generateWhatsAppLink(formData, items, total);
-
-      // Open WhatsApp
-      // Primary method: location.href is more reliable for mobile redirects
+      dispatch(addOrder(orderData));
+      
+      // Instant WhatsApp redirection
       window.location.href = link;
 
-      // Cleanup & Show Review Form
       dispatch(clearCart());
       setIsSuccess(true);
     } catch (err) {
@@ -164,7 +150,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, items, t
                         key={num}
                         type="button"
                         onClick={() => setRating(num)}
-                        className={`p-1 transition-all ${rating >= num ? 'text-hakimi-terracotta scale-110' : 'text-gray-200'}`}
+                        className={`p-1 transition-all ${rating >= num ? 'text-amber-400 scale-110' : 'text-gray-200'}`}
                       >
                         <i className={`lucide-star w-8 h-8 ${rating >= num ? 'fill-current' : ''}`}><Star className="w-8 h-8" /></i>
                       </button>

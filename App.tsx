@@ -226,7 +226,7 @@ const App: React.FC = () => {
           onClick={() => setIsReviewOpen(true)}
           className="bg-hakimi-forest text-white py-4 px-2 rounded-r-2xl shadow-2xl flex flex-col items-center gap-3 hover:bg-hakimi-terracotta transition-all group scale-90 hover:scale-100 origin-left"
         >
-          <Star className="w-5 h-5 fill-current text-hakimi-terracotta group-hover:text-white" />
+          <Star className="w-5 h-5 fill-current text-amber-400 group-hover:text-white" />
           <span className="text-[10px] font-black uppercase tracking-widest [writing-mode:vertical-lr] rotate-180">The Hakimi Experience</span>
         </button>
       </div>

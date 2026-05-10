@@ -113,12 +113,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             <h3 className="text-xl md:text-2xl font-serif font-bold text-hakimi-forest leading-tight group-hover:text-hakimi-terracotta transition-colors">
               {product.name}
             </h3>
-            <p className="text-gray-500 text-sm leading-relaxed line-clamp-2">
+            <p className="text-gray-500 text-sm leading-relaxed">
               {product.description}
             </p>
           </div>
           
-          <div className="flex items-center justify-between mt-8 pt-6 border-t border-hakimi-forest/5">
+          <div className="flex items-center justify-between mt-4 pt-4 border-t border-hakimi-forest/5">
             <div className="flex flex-col">
               <span className="text-xs font-bold text-hakimi-sage uppercase tracking-widest mb-0.5">Price</span>
               <span className="text-xl font-serif font-black text-hakimi-forest">

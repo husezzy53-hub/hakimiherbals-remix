@@ -61,7 +61,7 @@ const Hero: React.FC<HeroProps> = ({ onAddReview }) => {
               <h2 className="text-5xl md:text-7xl font-serif font-black leading-tight drop-shadow-sm text-balance animate-fade-in-up [animation-delay:200ms]">
                 {slide.title}
               </h2>
-              <p className="text-lg md:text-xl font-medium text-hakimi-cream/80 max-w-lg leading-relaxed line-clamp-2 animate-fade-in-up [animation-delay:400ms]">
+              <p className="text-lg md:text-xl font-medium text-hakimi-cream/80 max-w-lg leading-relaxed animate-fade-in-up [animation-delay:400ms]">
                 {slide.subtitle}
               </p>
               <div className="pt-4 flex flex-wrap gap-4 animate-fade-in-up [animation-delay:600ms]">

@@ -151,11 +151,11 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onClose })
             {product.name}
           </h2>
           
-          <div className="text-2xl lg:text-3xl font-serif font-black text-hakimi-sage mb-8">
+          <div className="text-2xl lg:text-3xl font-serif font-black text-hakimi-sage mb-4">
             Rs. {product.price}
           </div>
 
-          <div className="space-y-8 flex-grow">
+          <div className="space-y-4 flex-grow">
             <div>
               <h4 className="text-[10px] font-black text-hakimi-forest uppercase tracking-widest mb-3 opacity-40">The Essence</h4>
               <p className="text-gray-600 leading-relaxed text-base lg:text-lg">

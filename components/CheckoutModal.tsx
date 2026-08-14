@@ -66,7 +66,9 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, items, t
       })();
 
       // Start Sheet Submission in background
-      submitOrderToSheet(orderData).catch(err => console.error('Sheet submission failed:', err));
+      submitOrderToSheet(orderData).catch(() => {
+        // Handled gracefully in submitOrderToSheet
+      });
 
       const link = generateWhatsAppLink(formData, items, total);
       dispatch(addOrder(orderData));

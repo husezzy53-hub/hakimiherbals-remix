@@ -100,10 +100,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             </>
           )}
 
-          <div className="absolute top-4 left-4">
+          <div className="absolute top-4 left-4 flex items-center gap-2">
             <span className="px-3 py-1.5 bg-white/90 backdrop-blur-md text-hakimi-forest text-[9px] font-bold rounded-xl uppercase tracking-widest border border-hakimi-forest/5 shadow-sm">
               {product.category}
             </span>
+            {product.isOutOfStock && (
+              <span className="px-3 py-1.5 bg-amber-700/90 backdrop-blur-md text-white text-[9px] font-black rounded-xl uppercase tracking-widest shadow-sm">
+                Out of Stock
+              </span>
+            )}
           </div>
         </div>
         
@@ -125,12 +130,19 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 Rs. {product.price}
               </span>
             </div>
-            <button
-              onClick={(e) => { e.stopPropagation(); dispatch(addToCart(product)); }}
-              className="bg-hakimi-forest text-white h-12 w-12 rounded-2xl flex items-center justify-center hover:bg-hakimi-terracotta transition-all shadow-lg active:scale-90"
-            >
-              <Plus className="w-5 h-5" />
-            </button>
+            {product.isOutOfStock ? (
+              <span className="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-3 py-2 rounded-xl uppercase tracking-wider">
+                Sold Out
+              </span>
+            ) : (
+              <button
+                onClick={(e) => { e.stopPropagation(); dispatch(addToCart(product)); }}
+                className="bg-hakimi-forest text-white h-12 w-12 rounded-2xl flex items-center justify-center hover:bg-hakimi-terracotta transition-all shadow-lg active:scale-90"
+                title="Add to cart"
+              >
+                <Plus className="w-5 h-5" />
+              </button>
+            )}
           </div>
         </div>
       </div>

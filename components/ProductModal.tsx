@@ -139,9 +139,16 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onClose })
         {/* Right: Product Details */}
         <div className="w-full lg:w-[45%] p-8 lg:p-14 flex flex-col overflow-y-auto bg-white rounded-t-4xl md:rounded-t-none">
           <div className="flex justify-between items-start mb-6">
-            <span className="px-4 py-1.5 bg-hakimi-terracotta/10 text-hakimi-terracotta text-[10px] font-black uppercase tracking-[0.2em] rounded-full">
-              {product.category}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="px-4 py-1.5 bg-hakimi-terracotta/10 text-hakimi-terracotta text-[10px] font-black uppercase tracking-[0.2em] rounded-full">
+                {product.category}
+              </span>
+              {product.isOutOfStock && (
+                <span className="px-4 py-1.5 bg-amber-700/10 text-amber-800 border border-amber-300 text-[10px] font-black uppercase tracking-[0.2em] rounded-full">
+                  Out of Stock
+                </span>
+              )}
+            </div>
             <button onClick={onClose} className="hidden lg:block p-2 hover:bg-hakimi-cream rounded-full transition-colors text-gray-300 hover:text-hakimi-forest">
               <X className="w-6 h-6" />
             </button>
@@ -176,31 +183,42 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onClose })
           </div>
 
           <div className="mt-12 pt-8 border-t border-hakimi-forest/5 space-y-6 pb-8 md:pb-0">
-            <div className="flex items-center justify-between">
-              <span className="font-bold text-hakimi-forest">Quantity</span>
-              <div className="flex items-center gap-6 bg-hakimi-cream p-2 px-4 rounded-2xl">
-                <button 
-                  onClick={() => setQuantity(q => Math.max(1, q - 1))} 
-                  className="p-1 hover:text-hakimi-terracotta transition-colors"
-                >
-                  <Minus className="w-4 h-4" />
-                </button>
-                <span className="font-black text-lg w-6 text-center">{quantity}</span>
-                <button 
-                  onClick={() => setQuantity(q => q + 1)} 
-                  className="p-1 hover:text-hakimi-sage transition-colors"
-                >
-                  <Plus className="w-4 h-4" />
-                </button>
+            {!product.isOutOfStock && (
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-hakimi-forest">Quantity</span>
+                <div className="flex items-center gap-6 bg-hakimi-cream p-2 px-4 rounded-2xl">
+                  <button 
+                    onClick={() => setQuantity(q => Math.max(1, q - 1))} 
+                    className="p-1 hover:text-hakimi-terracotta transition-colors"
+                  >
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <span className="font-black text-lg w-6 text-center">{quantity}</span>
+                  <button 
+                    onClick={() => setQuantity(q => q + 1)} 
+                    className="p-1 hover:text-hakimi-sage transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
 
-            <button 
-              onClick={handleAddToCart}
-              className="w-full bg-hakimi-forest hover:bg-hakimi-terracotta text-white py-6 rounded-3xl font-black text-lg shadow-2xl shadow-hakimi-forest/20 flex items-center justify-center gap-3 transition-all active:scale-[0.98] uppercase tracking-widest"
-            >
-              <ShoppingBag className="w-5 h-5" /> Add To Basket
-            </button>
+            {product.isOutOfStock ? (
+              <button 
+                disabled
+                className="w-full bg-gray-200 text-gray-500 py-6 rounded-3xl font-black text-base uppercase tracking-widest cursor-not-allowed border border-gray-300"
+              >
+                Currently Out of Stock
+              </button>
+            ) : (
+              <button 
+                onClick={handleAddToCart}
+                className="w-full bg-hakimi-forest hover:bg-hakimi-terracotta text-white py-6 rounded-3xl font-black text-lg shadow-2xl shadow-hakimi-forest/20 flex items-center justify-center gap-3 transition-all active:scale-[0.98] uppercase tracking-widest"
+              >
+                <ShoppingBag className="w-5 h-5" /> Add To Basket
+              </button>
+            )}
           </div>
         </div>
       </div>

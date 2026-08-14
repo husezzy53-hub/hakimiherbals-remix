@@ -1,7 +1,7 @@
 
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { Product } from '../types';
-import { fetchProductsFromSheet } from '../services/googleSheets';
+import { fetchProductsFromSheet, fetchProductsViaGoogleApi } from '../services/googleSheets';
 
 interface ProductsState {
   items: Product[];
@@ -19,10 +19,20 @@ export const fetchProducts = createAsyncThunk('products/fetchAll', async () => {
   return await fetchProductsFromSheet();
 });
 
+export const fetchProductsWithOAuth = createAsyncThunk('products/fetchWithOAuth', async (token: string) => {
+  return await fetchProductsViaGoogleApi(token);
+});
+
 const productsSlice = createSlice({
   name: 'products',
   initialState,
-  reducers: {},
+  reducers: {
+    setProducts: (state, action: PayloadAction<Product[]>) => {
+      state.items = action.payload;
+      state.loading = false;
+      state.error = null;
+    }
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchProducts.pending, (state) => {
@@ -35,8 +45,21 @@ const productsSlice = createSlice({
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to fetch products';
+      })
+      .addCase(fetchProductsWithOAuth.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchProductsWithOAuth.fulfilled, (state, action) => {
+        state.loading = false;
+        state.items = action.payload;
+      })
+      .addCase(fetchProductsWithOAuth.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to fetch from Google Sheets API';
       });
   },
 });
 
+export const { setProducts } = productsSlice.actions;
 export default productsSlice.reducer;
+

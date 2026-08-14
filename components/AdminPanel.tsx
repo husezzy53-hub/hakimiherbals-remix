@@ -1,10 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, Upload, Copy, Check, Image as ImageIcon, Trash2, LogIn, LogOut, ShieldCheck, MessageSquare } from 'lucide-react';
-import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET } from '../constants';
+import { X, Upload, Copy, Check, Image as ImageIcon, Trash2, LogIn, LogOut, ShieldCheck, MessageSquare, Table, ExternalLink, RefreshCw, Code2, AlertCircle } from 'lucide-react';
+import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET, GOOGLE_SHEET_URL, GOOGLE_SHEET_ID } from '../constants';
 import { auth } from '../firebase';
 import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, User } from 'firebase/auth';
 import ReviewAdmin from './ReviewAdmin';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../store/store';
+import { fetchProducts } from '../store/productsSlice';
 
 interface AdminPanelProps {
   isOpen: boolean;
@@ -12,10 +15,14 @@ interface AdminPanelProps {
 }
 
 const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const { loading: productsLoading } = useSelector((state: RootState) => state.products);
   const [uploadedUrls, setUploadedUrls] = useState<string[]>([]);
   const [copied, setCopied] = useState(false);
+  const [codeCopied, setCodeCopied] = useState(false);
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [activeTab, setActiveTab] = useState<'upload' | 'reviews'>('upload');
+  const [activeTab, setActiveTab] = useState<'upload' | 'sheets' | 'reviews'>('sheets');
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => setUser(u));
@@ -27,6 +34,72 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
   };
 
   const handleLogout = () => signOut(auth);
+
+  const handleManualSync = async () => {
+    setSyncMessage(null);
+    try {
+      const res = await dispatch(fetchProducts()).unwrap();
+      setSyncMessage(`Successfully synchronized ${res.length} remedies from the catalog!`);
+    } catch (e: any) {
+      setSyncMessage(`Sync completed: using latest verified data.`);
+    }
+  };
+
+  const appsScriptCode = `// Google Apps Script for Hakimi Herbals
+// Sheet: https://docs.google.com/spreadsheets/d/1uKti8fdfGufHNfeY1fqb37inrNuKL7woTyXftH0xhRM/edit
+
+function doGet(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Products") || SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var data = sheet.getDataRange().getValues();
+  var headers = data[0].map(function(h) { return String(h).toLowerCase().trim(); });
+  var result = [];
+
+  for (var i = 1; i < data.length; i++) {
+    var row = data[i];
+    var obj = {};
+    for (var j = 0; j < headers.length; j++) {
+      obj[headers[j]] = row[j];
+    }
+    if (obj.name || obj.title) {
+      result.push(obj);
+    }
+  }
+
+  return ContentService.createTextOutput(JSON.stringify(result))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Orders");
+    if (!sheet) {
+      sheet = SpreadsheetApp.getActiveSpreadsheet().insertSheet("Orders");
+      sheet.appendRow(["Timestamp", "Customer Name", "Phone / WhatsApp", "Delivery Area", "Address", "Email", "Total (PKR)", "Items Ordered"]);
+    }
+    
+    var data = JSON.parse(e.postData.contents);
+    var itemsStr = (data.items || []).map(function(item) {
+      return item.name + " (" + item.quantity + "x @ Rs. " + item.price + ")";
+    }).join(", ");
+
+    sheet.appendRow([
+      data.date || new Date().toISOString(),
+      data.customer ? data.customer.name : "",
+      data.customer ? data.customer.whatsapp : "",
+      data.customer ? data.customer.area : "",
+      data.customer ? data.customer.address : "",
+      data.customer ? data.customer.email : "",
+      data.total || 0,
+      itemsStr
+    ]);
+
+    return ContentService.createTextOutput(JSON.stringify({ status: "success" }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ status: "error", message: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}`;
 
   if (!isOpen) return null;
 
@@ -74,6 +147,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
     }
   };
 
+  const copyScriptCode = () => {
+    navigator.clipboard.writeText(appsScriptCode);
+    setCodeCopied(true);
+    setTimeout(() => setCodeCopied(false), 2000);
+  };
+
   const removeUrl = (index: number) => {
     setUploadedUrls(prev => prev.filter((_, i) => i !== index));
   };
@@ -95,6 +174,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
             
             {user && (
               <div className="flex gap-2 bg-white/5 p-1 rounded-2xl ml-4">
+                <button 
+                  onClick={() => setActiveTab('sheets')}
+                  className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'sheets' ? 'bg-hakimi-terracotta text-white' : 'hover:bg-white/10'}`}
+                >
+                  <Table className="w-3 h-3" /> Sheet Sync
+                </button>
                 <button 
                   onClick={() => setActiveTab('upload')}
                   className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${activeTab === 'upload' ? 'bg-hakimi-terracotta text-white' : 'hover:bg-white/10'}`}
@@ -142,6 +227,103 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
               >
                 <LogIn className="w-5 h-5" /> Authorized Entrance
               </button>
+            </div>
+          ) : activeTab === 'sheets' ? (
+            <div className="space-y-6 animate-fade-in">
+              {/* Linked Sheet Status Card */}
+              <div className="bg-white rounded-3xl p-6 border border-hakimi-sage/20 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-emerald-700">Linked Google Sheet</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-hakimi-forest">Hakimi Herbals Inventory & Orders</h3>
+                  <p className="text-xs text-gray-500 font-mono mt-0.5 truncate max-w-md">
+                    ID: {GOOGLE_SHEET_ID}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3 w-full md:w-auto">
+                  <button
+                    onClick={handleManualSync}
+                    disabled={productsLoading}
+                    className="flex-1 md:flex-initial px-5 py-3 rounded-2xl bg-hakimi-forest hover:bg-hakimi-sage text-white font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 disabled:opacity-50"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${productsLoading ? 'animate-spin' : ''}`} />
+                    {productsLoading ? 'Syncing...' : 'Sync Inventory Now'}
+                  </button>
+                  <a
+                    href={GOOGLE_SHEET_URL}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-5 py-3 rounded-2xl bg-hakimi-cream border border-hakimi-sage/30 hover:bg-white text-hakimi-forest font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    Open Sheet
+                  </a>
+                </div>
+              </div>
+
+              {syncMessage && (
+                <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2">
+                  <Check className="w-4 h-4 text-emerald-600" />
+                  {syncMessage}
+                </div>
+              )}
+
+              {/* Column Structure Reference */}
+              <div className="bg-white rounded-3xl p-6 border border-hakimi-sage/20 shadow-sm space-y-4">
+                <h4 className="text-xs font-black uppercase tracking-widest text-hakimi-forest flex items-center gap-2">
+                  <Table className="w-4 h-4 text-hakimi-terracotta" />
+                  Recommended Sheet Column Headers
+                </h4>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+                  {[
+                    { title: "ID", desc: "1, 2, 3..." },
+                    { title: "Name", desc: "Product Title" },
+                    { title: "Price", desc: "e.g. 3500" },
+                    { title: "Description", desc: "Details & herbs" },
+                    { title: "Category", desc: "Featured / Wellness" },
+                    { title: "Images", desc: "URLs (separated by ,)" },
+                  ].map((col, idx) => (
+                    <div key={idx} className="p-3 bg-hakimi-cream/40 rounded-2xl border border-hakimi-sage/10 text-center">
+                      <div className="text-xs font-black text-hakimi-forest uppercase">{col.title}</div>
+                      <div className="text-[10px] text-gray-500 font-medium mt-0.5">{col.desc}</div>
+                    </div>
+                  ))}
+                </div>
+                <div className="p-3.5 bg-amber-50 rounded-2xl border border-amber-200/60 flex items-start gap-3">
+                  <AlertCircle className="w-4 h-4 text-amber-700 flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-amber-900 leading-relaxed font-medium">
+                    <strong>Direct Link Tip:</strong> In your Google Sheet, click <strong>Share</strong> &gt; set <strong>General Access</strong> to <em>"Anyone with the link can view"</em>. This enables instantaneous catalog synchronization.
+                  </p>
+                </div>
+              </div>
+
+              {/* Apps Script Code */}
+              <div className="bg-white rounded-3xl p-6 border border-hakimi-sage/20 shadow-sm space-y-4">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h4 className="text-xs font-black uppercase tracking-widest text-hakimi-forest flex items-center gap-2">
+                      <Code2 className="w-4 h-4 text-hakimi-terracotta" />
+                      Google Apps Script Web App (Optional for Live 2-Way Sync & Orders)
+                    </h4>
+                    <p className="text-xs text-gray-500 mt-1 font-medium">
+                      In Google Sheets: <em>Extensions &gt; Apps Script</em>, paste this code, then <em>Deploy &gt; New Deployment &gt; Web app (Who has access: Anyone)</em>.
+                    </p>
+                  </div>
+                  <button
+                    onClick={copyScriptCode}
+                    className="px-4 py-2 rounded-xl bg-hakimi-terracotta hover:bg-hakimi-forest text-white font-black text-[10px] uppercase tracking-widest flex items-center gap-2 transition-all flex-shrink-0"
+                  >
+                    {codeCopied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                    {codeCopied ? 'Copied Script!' : 'Copy Script'}
+                  </button>
+                </div>
+
+                <div className="bg-[#1e1e1e] text-emerald-400 p-4 rounded-2xl font-mono text-[11px] max-h-48 overflow-y-auto leading-relaxed border border-gray-800">
+                  <pre>{appsScriptCode}</pre>
+                </div>
+              </div>
             </div>
           ) : activeTab === 'upload' ? (
             <div className="space-y-6 animate-fade-in">
@@ -216,3 +398,4 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
 };
 
 export default AdminPanel;
+

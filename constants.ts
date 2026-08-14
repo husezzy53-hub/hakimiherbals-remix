@@ -1,3 +1,5 @@
+export const GOOGLE_SHEET_ID = "1uKti8fdfGufHNfeY1fqb37inrNuKL7woTyXftH0xhRM";
+export const GOOGLE_SHEET_URL = "https://docs.google.com/spreadsheets/d/1uKti8fdfGufHNfeY1fqb37inrNuKL7woTyXftH0xhRM/edit";
 export const GOOGLE_SHEET_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbygPaNxUrqyptsHw8qjCMiJg9pvnP2zSQ1R1zMtCvUJaZKPh-5hrpoKtibpSm2I-WI/exec";
 export const OWNER_PHONE_NUMBER = "+923336645253";
 

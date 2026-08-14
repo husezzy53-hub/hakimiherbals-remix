@@ -113,15 +113,13 @@ const App: React.FC = () => {
     );
   }
 
-  if (error && products.length === 0) {
+  if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-hakimi-cream flex-col p-8 text-center animate-fade-in">
         <h2 className="text-3xl font-serif font-black text-hakimi-forest">Nature is Restoring</h2>
         <p className="text-gray-600 mt-2 max-w-xs">We couldn't reach the herbal archive.</p>
         <button 
-          onClick={() => {
-            dispatch(fetchProducts());
-          }}
+          onClick={() => window.location.reload()}
           className="mt-8 px-10 py-4 bg-hakimi-forest text-white rounded-2xl font-black uppercase tracking-widest text-xs"
         >
           Reconnect

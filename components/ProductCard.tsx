@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Product } from '../types';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '../store/cartSlice';
-import { Plus, ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, Maximize2, Play } from 'lucide-react';
 import ProductModal from './ProductModal';
 
 interface ProductCardProps {
@@ -100,10 +100,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             </>
           )}
 
-          <div className="absolute top-4 left-4 flex items-center gap-2">
+          <div className="absolute top-4 left-4 flex items-center gap-2 flex-wrap max-w-[80%]">
             <span className="px-3 py-1.5 bg-white/90 backdrop-blur-md text-hakimi-forest text-[9px] font-bold rounded-xl uppercase tracking-widest border border-hakimi-forest/5 shadow-sm">
               {product.category}
             </span>
+            {product.name.toLowerCase().includes('rahat') && (
+              <span className="px-3 py-1.5 bg-hakimi-forest text-hakimi-cream text-[9px] font-bold rounded-xl uppercase tracking-widest shadow-md flex items-center gap-1">
+                <Play className="w-2.5 h-2.5 fill-current text-hakimi-terracotta" /> Video
+              </span>
+            )}
             {product.isOutOfStock && (
               <span className="px-3 py-1.5 bg-amber-700/90 backdrop-blur-md text-white text-[9px] font-black rounded-xl uppercase tracking-widest shadow-sm">
                 Out of Stock

@@ -8,6 +8,7 @@ import FeaturedCarousel from './components/FeaturedCarousel';
 import AdminPanel from './components/AdminPanel';
 import PurchaseDashboard from './components/PurchaseDashboard';
 import ProductModal from './components/ProductModal';
+import RahatOilVideoShowcase from './components/RahatOilVideoShowcase';
 import Contact from './components/Contact';
 import ReviewList from './components/ReviewList';
 import ReviewModal from './components/ReviewModal';
@@ -78,6 +79,7 @@ const App: React.FC = () => {
   }, [products, searchQuery, selectedCategory]);
 
   const featuredProducts = products.filter(p => p.category === 'Featured');
+  const rahatProduct = products.find(p => p.name.toLowerCase().includes('rahat'));
 
   const resetFilters = () => {
     setSearchQuery('');
@@ -160,6 +162,14 @@ const App: React.FC = () => {
               <FeaturedCarousel products={featuredProducts} />
              </div>
           </section>
+        )}
+
+        {/* Rahat Oil Video & Benefits Spotlight */}
+        {searchQuery === '' && (
+          <RahatOilVideoShowcase 
+            product={rahatProduct} 
+            onOpenProductModal={(p) => setHighlightedProduct(p)} 
+          />
         )}
 
         <section id="collection" className="py-24 bg-hakimi-cream">

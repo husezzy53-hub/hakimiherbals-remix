@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Product } from '../types';
-import { X, ShoppingBag, ChevronLeft, ChevronRight, Plus, Minus } from 'lucide-react';
+import { X, ShoppingBag, ChevronLeft, ChevronRight, Plus, Minus, Sparkles, Wind, Flame, Droplets } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '../store/cartSlice';
 
@@ -170,6 +170,37 @@ const ProductModal: React.FC<ProductModalProps> = ({ product, isOpen, onClose })
               </p>
             </div>
             
+            {product.name.toLowerCase().includes('rahat') && (
+              <div className="p-5 rounded-3xl bg-gradient-to-br from-hakimi-forest/5 via-hakimi-sage/10 to-amber-500/10 border border-hakimi-forest/15 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-hakimi-forest flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-hakimi-terracotta" />
+                    Everyday Massage Video Benefits
+                  </span>
+                  <span className="text-[9px] font-black text-hakimi-terracotta bg-hakimi-terracotta/10 px-2 py-0.5 rounded-full">
+                    Relief Guide
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                  <div className="p-2 bg-white/80 rounded-2xl border border-hakimi-forest/5">
+                    <Flame className="w-4 h-4 mx-auto text-amber-600 mb-1" />
+                    <span className="font-bold text-[11px] block text-hakimi-forest">Back & Knee</span>
+                    <span className="text-[9px] text-gray-500">Fast Comfort</span>
+                  </div>
+                  <div className="p-2 bg-white/80 rounded-2xl border border-hakimi-forest/5">
+                    <Wind className="w-4 h-4 mx-auto text-teal-600 mb-1" />
+                    <span className="font-bold text-[11px] block text-hakimi-forest">Clear Vapors</span>
+                    <span className="text-[9px] text-gray-500">Breathe Freely</span>
+                  </div>
+                  <div className="p-2 bg-white/80 rounded-2xl border border-hakimi-forest/5">
+                    <Droplets className="w-4 h-4 mx-auto text-emerald-600 mb-1" />
+                    <span className="font-bold text-[11px] block text-hakimi-forest">100% Herbal</span>
+                    <span className="text-[9px] text-gray-500">Kafoor & Mint</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 lg:p-5 rounded-3xl bg-hakimi-cream border border-hakimi-forest/5">
                 <p className="text-[9px] font-bold text-hakimi-sage uppercase tracking-widest mb-1">Purity</p>

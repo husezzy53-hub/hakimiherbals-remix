@@ -15,6 +15,9 @@ const ReviewAdmin: React.FC = () => {
       const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Review));
       setReviews(docs);
       setLoading(false);
+    }, (err) => {
+      console.warn("Firestore admin reviews error:", err);
+      setLoading(false);
     });
     return () => unsubscribe();
   }, []);

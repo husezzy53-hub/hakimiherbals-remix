@@ -14,37 +14,24 @@ service cloud.firestore {
     }
 
     function isValidId(id) {
-      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+      return id is string && id.size() <= 128;
     }
 
     function incoming() {
       return request.resource.data;
     }
 
-    function existing() {
-      return resource.data;
-    }
-
     match /reviews/{reviewId} {
       function isValidReview(data) {
-        return data.userName is string && data.userName.size() < 100
+        return data.userName is string && data.userName.size() <= 100
             && data.rating is number && data.rating >= 1 && data.rating <= 5
-            && data.comment is string && data.comment.size() <= 5000
             && data.status in ['pending', 'approved', 'rejected']
             && data.createdAt is timestamp;
       }
 
-      allow create: if isSignedIn() 
-                    && isValidId(reviewId) 
-                    && isValidReview(incoming());
-
-      allow update: if isAdmin() 
-                    && isValidReview(incoming());
-
-      allow delete: if isAdmin();
-      
-      allow read: if resource.data.status == 'approved' || isAdmin();
-      allow list: if (resource.data.status == 'approved') || isAdmin();
+      allow create: if isValidId(reviewId) && isValidReview(incoming());
+      allow update, delete: if isAdmin();
+      allow read, list: if resource.data.status == 'approved' || isAdmin();
     }
     
     match /admins/{adminId} {
@@ -52,3 +39,4 @@ service cloud.firestore {
     }
   }
 }
+

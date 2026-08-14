@@ -25,6 +25,9 @@ const ReviewList: React.FC<ReviewListProps> = ({ onAddReview }) => {
       const docs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Review));
       setReviews(docs);
       setLoading(false);
+    }, (err) => {
+      console.warn("Firestore reviews listener notice:", err);
+      setLoading(false);
     });
 
     return () => unsubscribe();

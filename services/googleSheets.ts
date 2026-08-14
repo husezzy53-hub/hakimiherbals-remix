@@ -3,7 +3,7 @@ import { OrderData, Product } from '../types';
 import { GOOGLE_SHEET_SCRIPT_URL, GOOGLE_SHEET_ID } from '../constants';
 import { getCachedAccessToken } from '../firebase';
 
-const CACHE_KEY = 'hakimi_cached_products_v3';
+const CACHE_KEY = 'hakimi_cached_products_v4';
 
 const DEFAULT_CATALOG: Product[] = [
   {
@@ -169,8 +169,7 @@ const DEFAULT_CATALOG: Product[] = [
     images: [
       "https://res.cloudinary.com/dmutdtyen/image/upload/v1767862420/Skin_Care_Basket_2_b06il2.jpg"
     ],
-    category: "Featured",
-    isOutOfStock: true
+    category: "Featured"
   },
   {
     id: 17,
@@ -181,8 +180,7 @@ const DEFAULT_CATALOG: Product[] = [
       "https://res.cloudinary.com/dmutdtyen/image/upload/v1769104411/30_gm_skin_care_zwlo2g.jpg",
       "https://res.cloudinary.com/dmutdtyen/image/upload/v1767862423/WhatsApp_Image_2026-01-03_at_12.25.13_AM_rfff06.jpg"
     ],
-    category: "Skin Care",
-    isOutOfStock: true
+    category: "Skin Care"
   },
   {
     id: 18,
@@ -192,8 +190,7 @@ const DEFAULT_CATALOG: Product[] = [
     images: [
       "https://res.cloudinary.com/dmutdtyen/image/upload/v1767862423/Skin_Care_lurkh8.jpg"
     ],
-    category: "Skin Care",
-    isOutOfStock: true
+    category: "Skin Care"
   },
   {
     id: 19,
@@ -203,8 +200,7 @@ const DEFAULT_CATALOG: Product[] = [
     images: [
       "https://res.cloudinary.com/dmutdtyen/image/upload/v1767862412/Cold_Cream_in_a_Tray_kznigy.jpg"
     ],
-    category: "Skin Care",
-    isOutOfStock: true
+    category: "Skin Care"
   },
   {
     id: 20,
@@ -214,8 +210,7 @@ const DEFAULT_CATALOG: Product[] = [
     images: [
       "https://res.cloudinary.com/dmutdtyen/image/upload/v1767862412/Cold_Cream_Front_uu0e4z.jpg"
     ],
-    category: "Skin Care",
-    isOutOfStock: true
+    category: "Skin Care"
   }
 ];
 
@@ -308,11 +303,6 @@ export function parseObjectsToProducts(items: any[]): Product[] {
     const idKey = keys.find(k => ['id', 'item_id', 'product_id', 'code', 'sku'].includes(k.toLowerCase()));
     const id = Number(idKey && !isNaN(Number(item[idKey])) ? item[idKey] : idx + 1);
 
-    // Detect Out Of Stock
-    const isOutOfStock = rawName.toUpperCase().includes('OUT OF STOCK') || 
-      String(item.stock || item.status || '').toUpperCase().includes('OUT') ||
-      rawCategory.toUpperCase().includes('OUT OF STOCK');
-
     let resolvedName = rawName;
     if (rawName.toUpperCase() === 'OUT OF STOCK' || rawName.toUpperCase().trim() === 'OUT OF STOCK') {
       const allImgStr = images.join(' ').toLowerCase();
@@ -328,7 +318,7 @@ export function parseObjectsToProducts(items: any[]): Product[] {
       } else if (allImgStr.includes('cold_cream') || descLower.includes('softness you feel')) {
         resolvedName = 'Cold Cream (60gm)';
       } else {
-        resolvedName = `Special Remedy #${id}`;
+        resolvedName = `Skin Care Remedy #${id}`;
       }
     }
 
@@ -339,7 +329,7 @@ export function parseObjectsToProducts(items: any[]): Product[] {
       description,
       images: images.length > 0 ? images : ['https://res.cloudinary.com/dmutdtyen/image/upload/v1767862412/Body_Spray_in_a_Shelf_y0ymfy.jpg'],
       category: rawCategory || 'General',
-      isOutOfStock
+      isOutOfStock: false
     };
   }).filter(p => p.name && p.name.trim().length > 0);
 }

@@ -71,13 +71,15 @@ const App: React.FC = () => {
       const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                            p.description.toLowerCase().includes(searchQuery.toLowerCase());
       
-      const matchesCategory = selectedCategory === 'All' ? true : p.category === selectedCategory;
+      const matchesCategory = selectedCategory === 'All' 
+        ? true 
+        : p.category === selectedCategory || (selectedCategory === 'Featured' && p.category.toLowerCase().includes('featured'));
       
       return matchesSearch && matchesCategory;
     });
   }, [products, searchQuery, selectedCategory]);
 
-  const featuredProducts = products.filter(p => p.category === 'Featured');
+  const featuredProducts = products.filter(p => p.category.toLowerCase().includes('featured'));
 
   const resetFilters = () => {
     setSearchQuery('');

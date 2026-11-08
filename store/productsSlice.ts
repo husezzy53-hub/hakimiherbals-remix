@@ -1,7 +1,7 @@
 
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { Product } from '../types';
-import { fetchProductsFromSheet, fetchProductsViaGoogleApi } from '../services/googleSheets';
+import { fetchProductsFromSheet, fetchProductsViaGoogleApi, fetchProductsFromLinkedDatabase } from '../services/googleSheets';
 
 interface ProductsState {
   items: Product[];
@@ -17,6 +17,10 @@ const initialState: ProductsState = {
 
 export const fetchProducts = createAsyncThunk('products/fetchAll', async () => {
   return await fetchProductsFromSheet();
+});
+
+export const fetchProductsFromDatabase = createAsyncThunk('products/fetchFromDatabase', async () => {
+  return await fetchProductsFromLinkedDatabase();
 });
 
 export const fetchProductsWithOAuth = createAsyncThunk('products/fetchWithOAuth', async (token: string) => {
@@ -45,6 +49,18 @@ const productsSlice = createSlice({
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to fetch products';
+      })
+      .addCase(fetchProductsFromDatabase.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchProductsFromDatabase.fulfilled, (state, action) => {
+        state.loading = false;
+        state.items = action.payload;
+        state.error = null;
+      })
+      .addCase(fetchProductsFromDatabase.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to fetch from linked database file';
       })
       .addCase(fetchProductsWithOAuth.pending, (state) => {
         state.loading = true;

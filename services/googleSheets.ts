@@ -1,9 +1,9 @@
 
 import { OrderData, Product } from '../types';
-import { GOOGLE_SHEET_SCRIPT_URL, GOOGLE_SHEET_ID } from '../constants';
+import { GOOGLE_SHEET_SCRIPT_URL, GOOGLE_SHEET_ID, DATABASE_FILE_PATH } from '../constants';
 import { getCachedAccessToken } from '../firebase';
 
-const CACHE_KEY = 'hakimi_cached_products_v4';
+const CACHE_KEY = 'hakimi_cached_products_v5';
 
 const DEFAULT_CATALOG: Product[] = [
   {
@@ -46,7 +46,7 @@ const DEFAULT_CATALOG: Product[] = [
       "https://res.cloudinary.com/dmutdtyen/image/upload/v1770618869/RaHAT_OIL_kmfh5z.jpg",
       "https://res.cloudinary.com/dmutdtyen/image/upload/v1770618876/RAHAT_OIL_BACK_gib3ef.jpg"
     ],
-    category: "Featured"
+    category: "Featured - Massage Oil"
   },
   {
     id: 5,
@@ -145,7 +145,7 @@ const DEFAULT_CATALOG: Product[] = [
     id: 14,
     name: "Herbal Face Powder",
     price: 500,
-    description: "A herbal face powder that keeps your skin fresh, smooth, and comfortable all day. Pure herbal care for naturally radiant skin, where tradition meets daily skincare.",
+    description: "A herbal face powder that keeps your skin fresh, smooth, and comfortable all day. Pure herbal care for naturally radiant skin,\nwhere tradition meets daily skincare.",
     images: [
       "https://res.cloudinary.com/dmutdtyen/image/upload/v1767862412/Face_Powder_uuhut2.jpg"
     ],
@@ -159,13 +159,14 @@ const DEFAULT_CATALOG: Product[] = [
     images: [
       "https://res.cloudinary.com/dmutdtyen/image/upload/v1767862416/Lip_Balm_Strawberry_tqi2wz.jpg"
     ],
-    category: "Skin Care"
+    category: "Skin Care",
+    isOutOfStock: true
   },
   {
     id: 16,
-    name: "Skin Care Basket",
+    name: "Herbal Skin Care Products & Fragrances",
     price: 1500,
-    description: "A graceful ritual for skin and lips , Pure comfort, understated luxury, Where tradition is blended with elegance.",
+    description: "A graceful ritual for skin and lips , Pure comfort, understated luxury,  Where tradition is blended with elegance.",
     images: [
       "https://res.cloudinary.com/dmutdtyen/image/upload/v1767862420/Skin_Care_Basket_2_b06il2.jpg"
     ],
@@ -173,7 +174,7 @@ const DEFAULT_CATALOG: Product[] = [
   },
   {
     id: 17,
-    name: "Skin Care Cream (30gm)",
+    name: "Skin Care Cream (25gm)",
     price: 300,
     description: "Deeply moisturizes, protects, and keeps your skin soft and smooth all day",
     images: [
@@ -184,7 +185,7 @@ const DEFAULT_CATALOG: Product[] = [
   },
   {
     id: 18,
-    name: "Skin Care Cream (50gm)",
+    name: "Skin Care Cream (60gm)",
     price: 500,
     description: "Wrap your skin in gentle care and lasting softness, every single day.",
     images: [
@@ -194,7 +195,7 @@ const DEFAULT_CATALOG: Product[] = [
   },
   {
     id: 19,
-    name: "Cold Cream (30gm)",
+    name: "Cold Cream 25gm",
     price: 300,
     description: "Wrap your skin in warmth, nourishment, and love. Crafted with care, trusted by nature",
     images: [
@@ -204,7 +205,7 @@ const DEFAULT_CATALOG: Product[] = [
   },
   {
     id: 20,
-    name: "Cold Cream (60gm)",
+    name: "Cold Cream 100gm",
     price: 1000,
     description: "Softness you feel, nourishment you trust",
     images: [
@@ -280,9 +281,16 @@ export function parseObjectsToProducts(items: any[]): Product[] {
     const nameKey = keys.find(k => ['name', 'product', 'title', 'item', 'product_name', 'item_name'].includes(k.toLowerCase()));
     let rawName = String(nameKey ? item[nameKey] : (item.name || item.title || `Hakimi Product ${idx + 1}`)).trim();
 
-    // Find Price
+    // Find Price and Out of Stock detection
     const priceKey = keys.find(k => ['price', 'rate', 'cost', 'amount', 'pkr', 'rs'].includes(k.toLowerCase()));
-    const price = parsePrice(priceKey ? item[priceKey] : item.price);
+    const rawPriceVal = priceKey ? item[priceKey] : item.price;
+    const isOutOfStock = String(rawPriceVal).toLowerCase().includes('out of stock') || 
+                         String(item.isoutofstock || item.stock || '').toLowerCase().includes('out') ||
+                         String(rawName).toLowerCase().includes('out of stock');
+    let price = parsePrice(rawPriceVal);
+    if (isOutOfStock && price === 0) {
+      price = 200; // Provide nominal base price for reference
+    }
 
     // Find Description
     const descKey = keys.find(k => ['description', 'desc', 'details', 'detail', 'benefit', 'benefits'].includes(k.toLowerCase()));
@@ -292,11 +300,9 @@ export function parseObjectsToProducts(items: any[]): Product[] {
     const catKey = keys.find(k => ['category', 'cat', 'type', 'group', 'tag'].includes(k.toLowerCase()));
     let rawCategory = String(catKey ? item[catKey] : (item.category || 'General')).trim();
     
-    // Normalize Category typos from sheets
+    // Normalize Category typos from sheets/CSV
     if (/skin\s*carem?/i.test(rawCategory)) {
       rawCategory = 'Skin Care';
-    } else if (/featured\s*-\s*massage\s*oil/i.test(rawCategory)) {
-      rawCategory = 'Featured';
     }
 
     // Find ID
@@ -308,15 +314,15 @@ export function parseObjectsToProducts(items: any[]): Product[] {
       const allImgStr = images.join(' ').toLowerCase();
       const descLower = description.toLowerCase();
       if (allImgStr.includes('basket') || descLower.includes('basket') || descLower.includes('ritual for skin')) {
-        resolvedName = 'Skin Care Basket';
+        resolvedName = 'Herbal Skin Care Products & Fragrances';
       } else if (allImgStr.includes('30_gm') || descLower.includes('30_gm')) {
-        resolvedName = 'Skin Care Cream (30gm)';
+        resolvedName = 'Skin Care Cream (25gm)';
       } else if (allImgStr.includes('skin_care') && price === 500) {
-        resolvedName = 'Skin Care Cream (50gm)';
+        resolvedName = 'Skin Care Cream (60gm)';
       } else if (allImgStr.includes('cold_cream_in_a_tray') || descLower.includes('warmth, nourishment')) {
-        resolvedName = 'Cold Cream (30gm)';
+        resolvedName = 'Cold Cream 25gm';
       } else if (allImgStr.includes('cold_cream') || descLower.includes('softness you feel')) {
-        resolvedName = 'Cold Cream (60gm)';
+        resolvedName = 'Cold Cream 100gm';
       } else {
         resolvedName = `Skin Care Remedy #${id}`;
       }
@@ -329,7 +335,7 @@ export function parseObjectsToProducts(items: any[]): Product[] {
       description,
       images: images.length > 0 ? images : ['https://res.cloudinary.com/dmutdtyen/image/upload/v1767862412/Body_Spray_in_a_Shelf_y0ymfy.jpg'],
       category: rawCategory || 'General',
-      isOutOfStock: false
+      isOutOfStock
     };
   }).filter(p => p.name && p.name.trim().length > 0);
 }
@@ -378,46 +384,86 @@ function parseGvizResponse(rawText: string): Product[] {
   return parseObjectsToProducts(items);
 }
 
-// Parse standard CSV text
-function parseCsvResponse(csvText: string): Product[] {
-  const lines = csvText.split(/\r?\n/).filter(line => line.trim().length > 0);
-  if (lines.length < 2) return [];
+// Parse standard RFC 4180 CSV text handling multiline quotes and embedded commas
+export function parseCsvTextToObjects(csvText: string): any[] {
+  const rows: string[][] = [];
+  let currentRow: string[] = [];
+  let currentCell = '';
+  let insideQuotes = false;
 
-  const parseRow = (rowStr: string): string[] => {
-    const cells: string[] = [];
-    let inQuotes = false;
-    let currCell = '';
-    for (let i = 0; i < rowStr.length; i++) {
-      const char = rowStr[i];
-      if (char === '"' && (i === 0 || rowStr[i - 1] !== '\\')) {
-        inQuotes = !inQuotes;
-      } else if (char === ',' && !inQuotes) {
-        cells.push(currCell.trim().replace(/^"|"$/g, '').replace(/""/g, '"'));
-        currCell = '';
+  for (let i = 0; i < csvText.length; i++) {
+    const char = csvText[i];
+    const nextChar = csvText[i + 1];
+
+    if (char === '"') {
+      if (insideQuotes && nextChar === '"') {
+        currentCell += '"';
+        i++;
       } else {
-        currCell += char;
+        insideQuotes = !insideQuotes;
       }
+    } else if (char === ',' && !insideQuotes) {
+      currentRow.push(currentCell.trim());
+      currentCell = '';
+    } else if ((char === '\r' || char === '\n') && !insideQuotes) {
+      if (char === '\r' && nextChar === '\n') {
+        i++;
+      }
+      currentRow.push(currentCell.trim());
+      if (currentRow.some(c => c.length > 0)) {
+        rows.push(currentRow);
+      }
+      currentRow = [];
+      currentCell = '';
+    } else {
+      currentCell += char;
     }
-    cells.push(currCell.trim().replace(/^"|"$/g, '').replace(/""/g, '"'));
-    return cells;
-  };
+  }
 
-  const headers = parseRow(lines[0]).map(h => h.toLowerCase());
+  if (currentCell.length > 0 || currentRow.length > 0) {
+    currentRow.push(currentCell.trim());
+    if (currentRow.some(c => c.length > 0)) {
+      rows.push(currentRow);
+    }
+  }
+
+  if (rows.length < 2) return [];
+
+  const headers = rows[0].map(h => h.toLowerCase().trim().replace(/^"|"$/g, ''));
   const items: any[] = [];
 
-  for (let i = 1; i < lines.length; i++) {
-    const values = parseRow(lines[i]);
+  for (let r = 1; r < rows.length; r++) {
+    const row = rows[r];
     const item: Record<string, any> = {};
-    headers.forEach((h, idx) => {
-      item[h] = values[idx] || '';
+    headers.forEach((h, colIdx) => {
+      item[h] = row[colIdx] ? row[colIdx].replace(/^"|"$/g, '').trim() : '';
     });
     if (Object.values(item).some(v => v !== '')) {
       items.push(item);
     }
   }
 
+  return items;
+}
+
+export function parseCsvResponse(csvText: string): Product[] {
+  const items = parseCsvTextToObjects(csvText);
   return parseObjectsToProducts(items);
 }
+
+/**
+ * Fetch products directly from the linked database asset in the workspace
+ */
+export const fetchProductsFromLinkedDatabase = async (): Promise<Product[]> => {
+  if (!DATABASE_FILE_PATH) throw new Error("No database file path configured");
+  const res = await fetch(DATABASE_FILE_PATH, { cache: 'no-cache' });
+  if (!res.ok) throw new Error(`Could not load database file at ${DATABASE_FILE_PATH}`);
+  const text = await res.text();
+  const products = parseCsvResponse(text);
+  if (products.length === 0) throw new Error("No products found in linked database file");
+  saveCache(products);
+  return products;
+};
 
 /**
  * Fetch products directly via Google Sheets API v4 using an OAuth Access Token
@@ -464,7 +510,20 @@ export const fetchProductsViaGoogleApi = async (token: string, sheetId: string =
 };
 
 export const fetchProductsFromSheet = async (): Promise<Product[]> => {
-  // Strategy 1: Google Sheets REST API v4 using cached OAuth Access Token (if user signed in)
+  // Strategy 1: Linked Herbal Database File (Authoritative repository asset)
+  if (DATABASE_FILE_PATH) {
+    try {
+      const dbProducts = await fetchProductsFromLinkedDatabase();
+      if (dbProducts.length > 0) {
+        console.log(`🌿 Hakimi Herbals - Synchronized ${dbProducts.length} remedies directly from linked database: ${DATABASE_FILE_PATH}`);
+        return dbProducts;
+      }
+    } catch (e) {
+      console.warn("Linked database file sync attempt failed, checking online sheets...", e);
+    }
+  }
+
+  // Strategy 2: Google Sheets REST API v4 using cached OAuth Access Token (if user signed in)
   const token = getCachedAccessToken();
   if (token && GOOGLE_SHEET_ID) {
     try {

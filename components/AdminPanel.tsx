@@ -1,13 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
-import { X, Upload, Copy, Check, Image as ImageIcon, Trash2, LogIn, LogOut, ShieldCheck, MessageSquare, Table, ExternalLink, RefreshCw, Code2, AlertCircle } from 'lucide-react';
-import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET, GOOGLE_SHEET_URL, GOOGLE_SHEET_ID } from '../constants';
+import { X, Upload, Copy, Check, Image as ImageIcon, Trash2, LogIn, LogOut, ShieldCheck, MessageSquare, Table, ExternalLink, RefreshCw, Code2, AlertCircle, Database, FileText } from 'lucide-react';
+import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET, GOOGLE_SHEET_URL, GOOGLE_SHEET_ID, DATABASE_FILE_PATH } from '../constants';
 import { auth, googleSignIn, googleSignOut, getCachedAccessToken } from '../firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import ReviewAdmin from './ReviewAdmin';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../store/store';
-import { fetchProducts, fetchProductsWithOAuth } from '../store/productsSlice';
+import { fetchProducts, fetchProductsWithOAuth, fetchProductsFromDatabase } from '../store/productsSlice';
 
 interface AdminPanelProps {
   isOpen: boolean;
@@ -59,6 +59,17 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ isOpen, onClose }) => {
       setSyncMessage(`Successfully synchronized ${res.length} remedies from the catalog!`);
     } catch (e: any) {
       setSyncError(e.message || `Sync completed with latest verified remedies.`);
+    }
+  };
+
+  const handleDatabaseSync = async () => {
+    setSyncMessage(null);
+    setSyncError(null);
+    try {
+      const res = await dispatch(fetchProductsFromDatabase()).unwrap();
+      setSyncMessage(`Successfully synchronized ${res.length} remedies directly from linked database: ${DATABASE_FILE_PATH}`);
+    } catch (e: any) {
+      setSyncError(e.message || 'Failed to sync with linked database');
     }
   };
 
@@ -253,6 +264,41 @@ function doPost(e) {
             </div>
           ) : activeTab === 'sheets' ? (
             <div className="space-y-6 animate-fade-in">
+              {/* Linked Database File Status Card */}
+              <div className="bg-white rounded-3xl p-6 border-2 border-hakimi-forest/15 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-emerald-700 flex items-center gap-1.5">
+                      <Database className="w-3 h-3 text-emerald-600" /> Linked Database File
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-bold text-hakimi-forest">Hakimi Herbal Master Database</h3>
+                  <p className="text-xs text-gray-500 font-mono mt-0.5 truncate max-w-md">
+                    {DATABASE_FILE_PATH}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3 w-full md:w-auto">
+                  <button
+                    onClick={handleDatabaseSync}
+                    disabled={productsLoading}
+                    className="flex-1 md:flex-initial px-5 py-3 rounded-2xl bg-hakimi-forest hover:bg-hakimi-sage text-white font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 disabled:opacity-50"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${productsLoading ? 'animate-spin' : ''}`} />
+                    {productsLoading ? 'Loading...' : 'Reload From Database'}
+                  </button>
+                  <a
+                    href={DATABASE_FILE_PATH}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-5 py-3 rounded-2xl bg-hakimi-cream border border-hakimi-sage/30 hover:bg-white text-hakimi-forest font-black text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all"
+                  >
+                    <FileText className="w-3.5 h-3.5" />
+                    Inspect File
+                  </a>
+                </div>
+              </div>
+
               {/* Linked Sheet Status Card */}
               <div className="bg-white rounded-3xl p-6 border border-hakimi-sage/20 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div>
